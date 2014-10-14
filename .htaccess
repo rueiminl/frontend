@@ -1,0 +1,2 @@
+Options +MultiViews
+AddType application/x-httpd-php .php
