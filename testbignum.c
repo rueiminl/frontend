@@ -1,0 +1,12 @@
+#include "bignum.h"
+#include <stdio.h>
+int main()
+{
+	char divident[] = "20630300497055296189489132603428150008912572451445788755351067609550255501160184017902946173672156459";
+	char divisor[] = "6876766832351765396496377534476050002970857483815262918450355869850085167053394672634315391224052153";
+	char buf[1024] = {0};
+	int len;
+	len = bignum_div(divident, sizeof(divident)-1, divisor, sizeof(divisor)-1, buf);
+	printf("quo(%d) = %s", len, buf);
+	return 0;
+}
