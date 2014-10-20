@@ -13,6 +13,8 @@
 #define Q1_STRING_LEN ((int)sizeof(Q1_STRING)-1)
 #define HTTP_RESPONSE_STRING "HTTP/1.1 200 OK\nContent-Length: "
 #define HTTP_RESPONSE_STRING_LEN ((int)sizeof(HTTP_RESPONSE_STRING)-1)
+#define HTTP_HEALTH_STRING "HTTP/1.1 200 OK\nContent-Length: 37\n\n<html><body>hello world</body></html>"
+#define HTTP_HEALTH_STRING_LEN ((int)sizeof(HTTP_HEALTH_STRING)-1)
 #define ID_STRING "Wolken\n5534-0848-5100,0299-6830-9164,4569-9487-7416"
 #define ID_STRING_LEN ((int)sizeof(ID_STRING)-1)
 #define KEY_STRING "6876766832351765396496377534476050002970857483815262918450355869850085167053394672634315391224052153"
@@ -62,18 +64,27 @@ void* response(void* sockfd)
 			}
 			pcheck++;
 		}
+		if (ret == 0)
+		{
+			printf("read ret 0...");
+			//might be health check
+			write(sockfd, HTTP_RESPONSE_STRING "0\n\n", HTTP_RESPONSE_STRING_LEN+3);
+			close(sockfd);
+			return;
+		}
 	}
 	if (strncmp(buf, Q1_STRING, Q1_STRING_LEN) != 0)
 	{
 		//buf[30] = 0;
 		printf("unknown message...");
-		//write(sockfd, HTTP_RESPONSE_STRING "0\n\n", HTTP_RESPONSE_STRING_LEN+3);
+		write(sockfd, HTTP_HEALTH_STRING, HTTP_HEALTH_STRING_LEN);
 		close(sockfd);
 		return;
 	}
 
 	//prepare response buffer
 	*pcheck = '\0';
+	printf("request = \n%s\n", buf);
 	mpz_set_str(xy, buf + Q1_STRING_LEN, 10);
 	mpz_set_str(x, public_key, 10);
 	mpz_cdiv_q(y, xy, x);
@@ -131,6 +142,7 @@ int main(int argc, char *argv[])
 	while (1)
 	{
 		// accept
+		printf("accepting...\n");
 		cli = accept(sockfd, 0, 0);
 		
 		// read request
@@ -139,6 +151,7 @@ int main(int argc, char *argv[])
 		// rc = pthread_create(th, 0, response, (void*)cli);
 		// if (rc != 0)
 		//	error("pthread_create failed...");
+		printf("responsing...\n");
 		response(cli);
 	}
 	close(sockfd);
