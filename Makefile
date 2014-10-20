@@ -1,5 +1,5 @@
 CC=gcc
-LIB=
+LIB=-lgmp -lpthread
 INCLUDE=.
 CFFLAG=
 objects=websvr.o bignum.o
