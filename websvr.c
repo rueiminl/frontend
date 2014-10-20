@@ -11,6 +11,8 @@
 #define MAX_BUFFER 4096
 #define Q1_STRING "GET /q1?key="
 #define Q1_STRING_LEN ((int)sizeof(Q1_STRING)-1)
+#define HTTP_HEALTH_STRING "HTTP/1.1 200 OK\nContent-Length: 37\n\n<html><body>hello world</body></html>"
+#define HTTP_HEALTH_STRING_LEN ((int)sizeof(HTTP_HEALTH_STRING)-1)
 #define HTTP_RESPONSE_STRING1 "HTTP/1.1 200 OK\nDate: Mon, 20 Oct 2014 07:06:25 GMT\nServer: Apache/2.4.7 (Ubuntu)\nLast-Modified: Tue, 18 May 2004 10:14:49 GMT\nETag: \"24-505d4efaddd76\"\nAccept-Ranges: bytes\nContent-Length: "
 #define DATE_OFFSET ((int)sizeof("HTTP/1.1 200 OK\nDate: ")-1)
 #define DATEEND_OFFSET (DATE_OFFSET+(sizeof("Mon, 20 Oct 2014 07:06:25 GMT")-1))
@@ -72,12 +74,20 @@ void* response(void* sockfd)
 			}
 			pcheck++;
 		}
+		if (ret == 0)
+		{
+			printf("read ret 0...");
+			//might be health check
+			close(sockfd);
+			return;
+		}
 	}
 	if (strncmp(buf, Q1_STRING, Q1_STRING_LEN) != 0)
 	{
 #ifdef _DEBUG
 		printf("unknown message...");
 #endif
+		write(sockfd, HTTP_HEALTH_STRING, HTTP_HEALTH_STRING_LEN);
 		close(sockfd);
 		return;
 	}
@@ -161,7 +171,9 @@ int main(int argc, char *argv[])
 		//rc = pthread_create(&th, 0, response, (void*)(long)cli);
 		//if (rc != 0)
 		//	error("pthread_create failed...");
-	//	printf("responsing...\n");
+#ifdef _DEBUG
+		printf("responsing...\n");
+#endif
 		response((void*)(long)cli);
 	}
 	close(sockfd);
