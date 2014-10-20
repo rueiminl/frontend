@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 		printf("accepting...\n");
 		cli = accept(sockfd, 0, 0);
 		printf("responsing...\n");
-		response(cli);
+		response((void*)(long)cli);
 	}
 	close(sockfd);
 	return 0;

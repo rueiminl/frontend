@@ -11,10 +11,14 @@
 #define MAX_BUFFER 4096
 #define Q1_STRING "GET /q1?key="
 #define Q1_STRING_LEN ((int)sizeof(Q1_STRING)-1)
-#define HTTP_RESPONSE_STRING "HTTP/1.1 200 OK\nContent-Length: "
-#define HTTP_RESPONSE_STRING_LEN ((int)sizeof(HTTP_RESPONSE_STRING)-1)
 #define HTTP_HEALTH_STRING "HTTP/1.1 200 OK\nContent-Length: 37\n\n<html><body>hello world</body></html>"
 #define HTTP_HEALTH_STRING_LEN ((int)sizeof(HTTP_HEALTH_STRING)-1)
+#define HTTP_RESPONSE_STRING1 "HTTP/1.1 200 OK\nDate: Mon, 20 Oct 2014 07:06:25 GMT\nServer: Apache/2.4.7 (Ubuntu)\nLast-Modified: Tue, 18 May 2004 10:14:49 GMT\nETag: \"24-505d4efaddd76\"\nAccept-Ranges: bytes\nContent-Length: "
+#define DATE_OFFSET ((int)sizeof("HTTP/1.1 200 OK\nDate: ")-1)
+#define DATEEND_OFFSET (DATE_OFFSET+(sizeof("Mon, 20 Oct 2014 07:06:25 GMT")-1))
+#define HTTP_RESPONSE_STRING2 "\nConnection: close\nContent-Type: text/plain\n\n"
+#define HTTP_RESPONSE_STRING1_LEN ((int)sizeof(HTTP_RESPONSE_STRING1)-1)
+#define HTTP_RESPONSE_STRING2_LEN ((int)sizeof(HTTP_RESPONSE_STRING2)-1)
 #define ID_STRING "Wolken\n5534-0848-5100,0299-6830-9164,4569-9487-7416"
 #define ID_STRING_LEN ((int)sizeof(ID_STRING)-1)
 #define KEY_STRING "6876766832351765396496377534476050002970857483815262918450355869850085167053394672634315391224052153"
@@ -31,7 +35,8 @@ void* response(void* sockfd)
 	int ret;
 	const char public_key[] = KEY_STRING;
 	const char id[] = ID_STRING;
-	const char http[] = HTTP_RESPONSE_STRING;
+	const char http1[] = HTTP_RESPONSE_STRING1;
+	const char http2[] = HTTP_RESPONSE_STRING2;
 	char timestamp[36] = TIMESTAMP;
 	char private_key[MAX_BUFFER];
 	char buf[MAX_BUFFER];
@@ -47,6 +52,7 @@ void* response(void* sockfd)
 	//read
 	while (!found)
 	{
+		printf("reading...\n");
 		ret = read(sockfd, pch, pend - pch);
 		if (ret < 0)
 		{
@@ -54,6 +60,8 @@ void* response(void* sockfd)
 			close(sockfd);
 			return;
 		}
+		if (ret == 0)
+			break;
 		pch += ret;
 		while (pch > pcheck)
 		{
@@ -68,7 +76,6 @@ void* response(void* sockfd)
 		{
 			printf("read ret 0...");
 			//might be health check
-			write(sockfd, HTTP_RESPONSE_STRING "0\n\n", HTTP_RESPONSE_STRING_LEN+3);
 			close(sockfd);
 			return;
 		}
@@ -84,7 +91,8 @@ void* response(void* sockfd)
 
 	//prepare response buffer
 	*pcheck = '\0';
-	printf("request = \n%s\n", buf);
+	printf("request: %s\n", buf);
+
 	mpz_set_str(xy, buf + Q1_STRING_LEN, 10);
 	mpz_set_str(x, public_key, 10);
 	mpz_cdiv_q(y, xy, x);
@@ -95,9 +103,12 @@ void* response(void* sockfd)
 	//printf("len = %d\n", len);
 	time(&tnow);
 	now = localtime(&tnow);
+	strftime(buf + DATE_OFFSET, sizeof(buf)-DATE_OFFSET, "%a, %d %b %Y %H:%M:%S %z", now);
+	buf[DATEEND_OFFSET] = '\n';
 	strftime(timestamp, sizeof(timestamp), "%Y:%m:%d %H:%M:%S", now);
 	len = strlen(private_key) + 1 + ID_STRING_LEN + 1 + strlen(timestamp) + 1;
-	sprintf(buf, "%s%d\n\n%s\n%s\n%s\n", http, len, private_key, id, timestamp);
+	sprintf(buf, "%s%d%s%s\n%s\n%s\n", http1, len, http2, private_key, id, timestamp);
+	printf("response: %s\n", buf);
 	//write
 	pend = buf + strlen(buf);
 	pch = buf;
@@ -111,6 +122,7 @@ void* response(void* sockfd)
 			return;
 		}
 		pch += ret;
+
 	}
 	close(sockfd);
 }
@@ -148,11 +160,12 @@ int main(int argc, char *argv[])
 		// read request
 		// write response
 		// close
-		// rc = pthread_create(th, 0, response, (void*)cli);
-		// if (rc != 0)
-		//	error("pthread_create failed...");
 		printf("responsing...\n");
-		response(cli);
+		rc = pthread_create(&th, 0, response, (void*)(long)cli);
+		if (rc != 0)
+			error("pthread_create failed...");
+	//	printf("responsing...\n");
+		//response(cli);
 	}
 	close(sockfd);
 	printf("test");
