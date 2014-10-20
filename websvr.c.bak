@@ -13,6 +13,8 @@
 #define Q1_STRING_LEN ((int)sizeof(Q1_STRING)-1)
 #define HTTP_RESPONSE_STRING "HTTP/1.1 200 OK\nContent-Length: "
 #define HTTP_RESPONSE_STRING_LEN ((int)sizeof(HTTP_RESPONSE_STRING)-1)
+#define HTTP_HEALTH_STRING "HTTP/1.1 200 OK\nContent-Length: 37\n\n<html><body>hello world</body></html>"
+#define HTTP_HEALTH_STRING_LEN ((int)sizeof(HTTP_HEALTH_STRING)-1)
 #define ID_STRING "Wolken\n5534-0848-5100,0299-6830-9164,4569-9487-7416"
 #define ID_STRING_LEN ((int)sizeof(ID_STRING)-1)
 #define KEY_STRING "6876766832351765396496377534476050002970857483815262918450355869850085167053394672634315391224052153"
@@ -75,7 +77,7 @@ void* response(void* sockfd)
 	{
 		//buf[30] = 0;
 		printf("unknown message...");
-		write(sockfd, HTTP_RESPONSE_STRING "0\n\n", HTTP_RESPONSE_STRING_LEN+3);
+		write(sockfd, HTTP_HEALTH_STRING, HTTP_HEALTH_STRING_LEN);
 		close(sockfd);
 		return;
 	}
