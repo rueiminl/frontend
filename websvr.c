@@ -30,7 +30,7 @@ void* response(void* sockfd)
 	const char public_key[] = KEY_STRING;
 	const char id[] = ID_STRING;
 	const char http[] = HTTP_RESPONSE_STRING;
-	char timestamp[] = TIMESTAMP;
+	char timestamp[36] = TIMESTAMP;
 	char private_key[MAX_BUFFER];
 	char buf[MAX_BUFFER];
 	int len = MAX_BUFFER;
@@ -38,6 +38,8 @@ void* response(void* sockfd)
 	char* pend = pch + MAX_BUFFER;
 	char* pcheck = pch + Q1_STRING_LEN - 1;
 	int found = 0;
+	time_t tnow;
+	struct tm* now;
 	mpz_t x, xy, y;
 	mpz_inits(x, y, xy, 0);
 	//read
@@ -71,7 +73,10 @@ void* response(void* sockfd)
 	//printf("divisor = %s, len = %d\n", key, (int)sizeof(key)-1);
 	//len = bignum_div(buf + Q1_STRING_LEN, pcheck - buf - Q1_STRING_LEN, key, (int)sizeof(key)-1, buf);
 	//printf("len = %d\n", len);
-	len = strlen(private_key) + 1 + ID_STRING_LEN + 1 + TIMESTAMP_LEN + 1;
+	time(&tnow);
+	now = localtime(&tnow);
+	strftime(timestamp, sizeof(timestamp), "%Y:%m:%d %H:%M:%S", now);
+	len = strlen(private_key) + 1 + ID_STRING_LEN + 1 + strlen(timestamp) + 1;
 	sprintf(buf, "%s%d\n\n%s\n%s\n%s\n", http, len, private_key, id, timestamp);
 	//write
 	pend = buf + strlen(buf);
