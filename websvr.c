@@ -11,7 +11,7 @@
 #define MAX_BUFFER 4096
 #define Q1_STRING "GET /q1?key="
 #define Q1_STRING_LEN ((int)sizeof(Q1_STRING)-1)
-#define HTTP_RESPONSE_STRING "HTTP/1.1 200 OK\nContent-Length: "
+#define HTTP_RESPONSE_STRING "HTTP/1.1 200 OK\nConnection: close\nServer: Wolken 1.0\nContent-Length: "
 #define HTTP_RESPONSE_STRING_LEN ((int)sizeof(HTTP_RESPONSE_STRING)-1)
 #define ID_STRING "Wolken\n5534-0848-5100,0299-6830-9164,4569-9487-7416"
 #define ID_STRING_LEN ((int)sizeof(ID_STRING)-1)
@@ -74,6 +74,8 @@ void* response(void* sockfd)
 
 	//prepare response buffer
 	*pcheck = '\0';
+	printf("request: %s\n", buf);
+
 	mpz_set_str(xy, buf + Q1_STRING_LEN, 10);
 	mpz_set_str(x, public_key, 10);
 	mpz_cdiv_q(y, xy, x);
@@ -87,6 +89,7 @@ void* response(void* sockfd)
 	strftime(timestamp, sizeof(timestamp), "%Y:%m:%d %H:%M:%S", now);
 	len = strlen(private_key) + 1 + ID_STRING_LEN + 1 + strlen(timestamp) + 1;
 	sprintf(buf, "%s%d\n\n%s\n%s\n%s\n", http, len, private_key, id, timestamp);
+	printf("response: %s\n", buf);
 	//write
 	pend = buf + strlen(buf);
 	pch = buf;
@@ -100,6 +103,7 @@ void* response(void* sockfd)
 			return;
 		}
 		pch += ret;
+
 	}
 	close(sockfd);
 }
@@ -131,15 +135,17 @@ int main(int argc, char *argv[])
 	while (1)
 	{
 		// accept
+		printf("accepting...\n");
 		cli = accept(sockfd, 0, 0);
 		
 		// read request
 		// write response
 		// close
-		// rc = pthread_create(th, 0, response, (void*)cli);
-		// if (rc != 0)
-		//	error("pthread_create failed...");
-		response(cli);
+		rc = pthread_create(&th, 0, response, (void*)(long)cli);
+		if (rc != 0)
+			error("pthread_create failed...");
+		printf("responsing...\n");
+		//response(cli);
 	}
 	close(sockfd);
 	printf("test");
