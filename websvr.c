@@ -50,7 +50,9 @@ void* response(void* sockfd)
 	//read
 	while (!found)
 	{
+#ifdef _DEBUG
 		printf("reading...\n");
+#endif
 		ret = read(sockfd, pch, pend - pch);
 		if (ret < 0)
 		{
@@ -73,33 +75,36 @@ void* response(void* sockfd)
 	}
 	if (strncmp(buf, Q1_STRING, Q1_STRING_LEN) != 0)
 	{
-		//buf[30] = 0;
+#ifdef _DEBUG
 		printf("unknown message...");
-		//write(sockfd, HTTP_RESPONSE_STRING "0\n\n", HTTP_RESPONSE_STRING_LEN+3);
+#endif
 		close(sockfd);
 		return;
 	}
 
 	//prepare response buffer
 	*pcheck = '\0';
+#ifdef _DEBUG
 	printf("request: %s\n", buf);
+#endif
 
 	mpz_set_str(xy, buf + Q1_STRING_LEN, 10);
 	mpz_set_str(x, public_key, 10);
 	mpz_cdiv_q(y, xy, x);
 	mpz_get_str(private_key, 10, y);
-	//printf("divident = %s, len = %d\n", buf + Q1_STRING_LEN, (int)(pcheck-buf)-Q1_STRING_LEN);
-	//printf("divisor = %s, len = %d\n", key, (int)sizeof(key)-1);
-	//len = bignum_div(buf + Q1_STRING_LEN, pcheck - buf - Q1_STRING_LEN, key, (int)sizeof(key)-1, buf);
-	//printf("len = %d\n", len);
+	
 	time(&tnow);
 	now = localtime(&tnow);
 	strftime(buf + DATE_OFFSET, sizeof(buf)-DATE_OFFSET, "%a, %d %b %Y %H:%M:%S %z", now);
 	buf[DATEEND_OFFSET] = '\n';
 	strftime(timestamp, sizeof(timestamp), "%Y:%m:%d %H:%M:%S", now);
+	
 	len = strlen(private_key) + 1 + ID_STRING_LEN + 1 + strlen(timestamp) + 1;
 	sprintf(buf, "%s%d%s%s\n%s\n%s\n", http1, len, http2, private_key, id, timestamp);
+#ifdef _DEBUG
 	printf("response: %s\n", buf);
+#endif
+	
 	//write
 	pend = buf + strlen(buf);
 	pch = buf;
@@ -145,19 +150,20 @@ int main(int argc, char *argv[])
 	while (1)
 	{
 		// accept
+#ifdef _DEBUG
 		printf("accepting...\n");
+#endif
 		cli = accept(sockfd, 0, 0);
 		
 		// read request
 		// write response
 		// close
-		rc = pthread_create(&th, 0, response, (void*)(long)cli);
-		if (rc != 0)
-			error("pthread_create failed...");
+		//rc = pthread_create(&th, 0, response, (void*)(long)cli);
+		//if (rc != 0)
+		//	error("pthread_create failed...");
 	//	printf("responsing...\n");
-		//response(cli);
+		response((void*)(long)cli);
 	}
 	close(sockfd);
-	printf("test");
 	return 0;
 }

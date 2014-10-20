@@ -6,12 +6,9 @@
 #include <stdio.h>
 #include <pthread.h>
 
-#define LISTEN_PORT 123
+#define LISTEN_PORT 1025
 #define BACKLOG 10000	// max number of pending connection
 #define MAX_BUFFER 4096
-
-#define HTTP_HEALTH_STRING "HTTP/1.1 200 OK\nContent-Length: 37\n\n<html><body>hello world</body></html>"
-#define HTTP_HEALTH_STRING_LEN ((int)sizeof(HTTP_HEALTH_STRING)-1)
 
 void error(const char* msg)
 {
@@ -19,33 +16,11 @@ void error(const char* msg)
 	exit(1); 
 }
 
-void* response(void* sockfd)
-{
-	int ret;
-	char buf[MAX_BUFFER] = HTTP_HEALTH_STRING;
-	char* pch = buf;
-	char* pend = pch + HTTP_HEALTH_STRING_LEN;
-	//prepare response buffer
-	while (pch < pend)
-	{
-		ret = write(sockfd, buf, pend - pch);
-		if (ret < 0)
-		{
-			perror("write failed...");
-			close(sockfd);
-			return;
-		}
-		pch += ret;
-	}
-	close(sockfd);
-}
-
 int main(int argc, char *argv[])
 {
 	int sockfd, cli;
 	struct sockaddr_in addr;
-	int rc;
-	pthread_t th;
+	int ret;
 	memset((char*)&addr, 0, sizeof(addr));
 
 	// create a listen socket to accept all clients' requests and response
@@ -68,9 +43,12 @@ int main(int argc, char *argv[])
 	{
 		printf("accepting...\n");
 		cli = accept(sockfd, 0, 0);
-		printf("responsing...\n");
-		response((void*)(long)cli);
+		if (cli < 0)
+			error("accept failed...");
+		ret = close(cli);
+		if (ret < 0)
+			error("close failed...");
+		printf("great, the dumb elb comes in, now shut it down...\n");
 	}
-	close(sockfd);
 	return 0;
 }
