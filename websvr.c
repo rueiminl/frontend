@@ -65,9 +65,9 @@ void* response(void* sockfd)
 	}
 	if (strncmp(buf, Q1_STRING, Q1_STRING_LEN) != 0)
 	{
-		buf[30] = 0;
+		//buf[30] = 0;
 		printf("unknown message...");
-		write(sockfd, HTTP_RESPONSE_STRING "0\n\n", HTTP_RESPONSE_STRING_LEN+3);
+		//write(sockfd, HTTP_RESPONSE_STRING "0\n\n", HTTP_RESPONSE_STRING_LEN+3);
 		close(sockfd);
 		return;
 	}
