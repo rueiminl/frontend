@@ -5,9 +5,9 @@
 #include <gmp.h>
 #include <stdio.h>
 #include <pthread.h>
-
+#include <semaphore.h>
 #define HTTP_PORT 80
-#define BACKLOG 10000	// max number of pending connection
+#define BACKLOG 10	// max number of pending connection
 #define MAX_BUFFER 4096
 #define Q1_STRING "GET /q1?key="
 #define Q1_STRING_LEN ((int)sizeof(Q1_STRING)-1)
@@ -24,13 +24,46 @@
 #define KEY_STRING "6876766832351765396496377534476050002970857483815262918450355869850085167053394672634315391224052153"
 #define TIMESTAMP "0"
 #define TIMESTAMP_LEN 1
+#define MAX_SOCKET 200
+#define MAX_THREAD 20
 void error(const char* msg)
 {
 	perror(msg);
 	exit(1); 
 }
 
-void* response(void* sockfd)
+int sock_queue[MAX_SOCKET] = {0};
+int sock_queue_head = 0;
+int sock_queue_tail = 0;
+sem_t queue_notempty;
+sem_t queue_notfull;
+pthread_mutex_t queue_mutex = PTHREAD_MUTEX_INITIALIZER;
+void push(int sockfd)
+{
+	sem_wait(&queue_notfull);
+	pthread_mutex_lock(&queue_mutex);
+	sock_queue[sock_queue_tail++] = sockfd;
+	if (sock_queue_tail == MAX_SOCKET)
+		sock_queue_tail = 0;
+	pthread_mutex_unlock(&queue_mutex);
+	sem_post(&queue_notempty);
+}
+
+
+int pop()	//block threadpool
+{
+	int ret = 0;
+	sem_wait(&queue_notempty);
+	pthread_mutex_lock(&queue_mutex);
+	ret = sock_queue[sock_queue_head++];
+	if (sock_queue_head == MAX_SOCKET)
+		sock_queue_head = 0;
+	pthread_mutex_unlock(&queue_mutex);
+	sem_post(&queue_notfull);
+	return ret;
+}
+
+void response(int sockfd)
 {
 	int ret;
 	const char public_key[] = KEY_STRING;
@@ -133,13 +166,32 @@ void* response(void* sockfd)
 	close(sockfd);
 }
 
+void* threadpool(void* id)
+{
+	int cli;
+	while (1)
+	{
+		cli = pop();	//block
+		response(cli);
+	}
+	return 0;
+}
+
 int main(int argc, char *argv[])
 {
 	int sockfd, cli;
 	struct sockaddr_in addr;
-	int rc;
-	pthread_t th;
+	int rc, i;
+	pthread_t tid[MAX_THREAD];
 	memset((char*)&addr, 0, sizeof(addr));
+	sem_init(&queue_notempty, 0, 0);
+	sem_init(&queue_notfull, 0, MAX_SOCKET - 1);
+
+	for (i = 0; i < MAX_THREAD; i++)
+	{
+		if (pthread_create(&tid[i], 0, threadpool, (void*)(long)i) < 0)
+			error("pthread_create failed...");
+	}
 
 	// create a listen socket to accept all clients' requests and response
 
@@ -164,17 +216,9 @@ int main(int argc, char *argv[])
 		printf("accepting...\n");
 #endif
 		cli = accept(sockfd, 0, 0);
-		
-		// read request
-		// write response
-		// close
-		//rc = pthread_create(&th, 0, response, (void*)(long)cli);
-		//if (rc != 0)
-		//	error("pthread_create failed...");
-#ifdef _DEBUG
-		printf("responsing...\n");
-#endif
-		response((void*)(long)cli);
+		if (cli < 0)
+			perror("accept failed...");
+		push(cli);
 	}
 	close(sockfd);
 	return 0;
