@@ -1,7 +1,7 @@
 <?php
-	include "pw.php";
 	$servername = "localhost";
 	$username = "root";
+	$password = "wolken";
 	$dbname = "test";
 
 	$conn = new mysqli($servername, $username, $password, $dbname);
