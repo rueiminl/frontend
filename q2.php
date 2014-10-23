@@ -1,19 +1,12 @@
 <?php
-	$servername = "localhost";
-	$username = "root";
-	$password = "wolken";
-	$dbname = "test";
-
-	$conn = new mysqli($servername, $username, $password, $dbname);
+	$conn = new mysqli("localhost", "root", "wolken", "test");
 	if ($conn->connect_error) 
 	{
 		die("Database connection failed: " . $conn->connect_error);
 	}
 	$conn->set_charset("utf8");
-	include "util.php";
-	echo $team_id.",".$aws_account_id[0].",".$aws_account_id[1].",".$aws_account_id[2]."\n";
-	$query = "select tid, sentiment, text from tweet where uid=".$_GET["userid"]." and ts=\"".$_GET["tweet_time"]."\" order by tid";
-	$result = mysqli_query($conn, $query);
+	echo "Wolken,5534-0848-5100,0299-6830-9164,4569-9487-7416\n";
+	$result = mysqli_query($conn, "select tid, sentiment, text from tweet where uid=".$_GET["userid"]." and ts=\"".$_GET["tweet_time"]."\" order by tid");
 	while($row = mysqli_fetch_array($result)) 
 	{
 		echo $row['tid'].":".$row['sentiment'].":".$row['text']."\n";
