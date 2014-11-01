@@ -1,0 +1,2 @@
+source ./configure.sh
+./deploy.sh
