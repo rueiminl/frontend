@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+    version="2.4">
+
+    <display-name>15619 Application</display-name>
+    <description>
+	This is a simple web application for project 15619 
+    </description>
+
+    <servlet>
+        <servlet-name>q1</servlet-name>
+        <servlet-class>mypackage.q1</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>q1</servlet-name>
+        <url-pattern>/q1</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>q2</servlet-name>
+        <servlet-class>mypackage.q2</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>q2</servlet-name>
+        <url-pattern>/q2</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>q3</servlet-name>
+        <servlet-class>mypackage.q3</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>q3</servlet-name>
+        <url-pattern>/q3</url-pattern>
+    </servlet-mapping>
+    
+    <servlet>
+        <servlet-name>q4</servlet-name>
+        <servlet-class>mypackage.q4</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>q4</servlet-name>
+        <url-pattern>/q4</url-pattern>
+    </servlet-mapping>
+
+</web-app>
