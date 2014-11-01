@@ -29,7 +29,7 @@ public class q3 extends HttpServlet {
 	    	p.put("user","root");
     		p.put("password","wolken");
 		Connection conn = DriverManager.getConnection(CONNECTION, p);
-		String query = "select rid from q3 where uid=" + request.getParameter("usrid") + ";";
+		String query = "select rid from q3 where uid=" + request.getParameter("userid") + ";";
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		while (rs.next())
