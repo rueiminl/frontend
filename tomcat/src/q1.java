@@ -3,6 +3,8 @@ import java.io.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.math.*;
+import java.util.*;
+import java.text.*;
 
 // Extend HttpServlet class
 public class q1 extends HttpServlet {
@@ -20,7 +22,8 @@ public class q1 extends HttpServlet {
         BigInteger x = new BigInteger("6876766832351765396496377534476050002970857483815262918450355869850085167053394672634315391224052153");
         BigInteger xy = new BigInteger("20630300497055296189489132603428150008912572451445788755351067609550255501160184017902946173672156459");
         BigInteger y = xy.divide(x);
-        out.println(y + "\nWolken,5534-0848-5100,0299-6830-9164,4569-9487-7416\n");
+	SimpleDateFormat ft = new SimpleDateFormat ("yyyy-MM-dd hh:mm:ss");
+        out.println(y + "\nWolken,5534-0848-5100,0299-6830-9164,4569-9487-7416\n" + ft.format(new Date()));
     }
 
     public void destroy() {
