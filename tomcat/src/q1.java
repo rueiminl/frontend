@@ -16,11 +16,11 @@ public class q1 extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         // Set response content type
-        response.setContentType("text/html");
+        response.setContentType("text/plain");
         // Actual logic goes here.
         PrintWriter out = response.getWriter();
         BigInteger x = new BigInteger("6876766832351765396496377534476050002970857483815262918450355869850085167053394672634315391224052153");
-        BigInteger xy = new BigInteger("20630300497055296189489132603428150008912572451445788755351067609550255501160184017902946173672156459");
+	BigInteger xy = new BigInteger(request.getParameter("key"));
         BigInteger y = xy.divide(x);
 	SimpleDateFormat ft = new SimpleDateFormat ("yyyy-MM-dd hh:mm:ss");
         out.println(y + "\nWolken,5534-0848-5100,0299-6830-9164,4569-9487-7416\n" + ft.format(new Date()));
