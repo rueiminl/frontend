@@ -3,27 +3,70 @@ import java.io.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.math.*;
+import java.util.*;
+import java.sql.*;
 
 // Extend HttpServlet class
 public class q2 extends HttpServlet {
 
-    public void init() throws ServletException {
-        // Do required initialization
+    static Connection conn;
+    public void init() throws ServletException 
+    {
+	try
+	{
+		reconnect();
+	}
+	catch (Exception e)
+	{
+	}
+    }
+
+    public void reconnect() throws SQLException 
+    {
+	try 
+	{
+		Class.forName("com.mysql.jdbc.Driver");
+		conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/db15619?user=root&password=wolken");
+	}
+	catch (Exception e)
+	{
+	}
     }
 
     public void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         // Set response content type
-        response.setContentType("text/html");
+        response.setContentType("text/plain");
         // Actual logic goes here.
         PrintWriter out = response.getWriter();
-        BigInteger x = new BigInteger("6876766832351765396496377534476050002970857483815262918450355869850085167053394672634315391224052153");
-        BigInteger xy = new BigInteger("20630300497055296189489132603428150008912572451445788755351067609550255501160184017902946173672156459");
-        BigInteger y = xy.divide(x);
-        out.println(y + "\nWolken,5534-0848-5100,0299-6830-9164,4569-9487-7416\n");
+        out.println("Wolken,5534-0848-5100,0299-6830-9164,4569-9487-7416");
+	try 
+	{
+		String query = "select concat(tid, \":\", s, \":\", msg) as reply from q2 where uid=" + request.getParameter("userid") + " and ts='" + request.getParameter("tweet_time") + "' order by tid;";
+		Statement st = conn.createStatement();
+		ResultSet rs = st.executeQuery(query);
+		while (rs.next())
+		{
+			String reply = rs.getString("reply");
+			out.println(reply);
+		}
+		rs.close();
+		st.close();
+	}
+	catch (Exception e)
+	{
+		out.println(e);
+	}
     }
 
     public void destroy() {
         // do nothing.
+	try
+	{
+		conn.close();
+	}
+	catch (Exception e)
+	{
+	}
     }
 }
