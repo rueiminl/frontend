@@ -9,10 +9,28 @@ import java.sql.*;
 // Extend HttpServlet class
 public class q3 extends HttpServlet {
 
-    static final String CONNECTION = "jdbc:mysql://localhost/db15619";
+    static Connection conn;
+    public void init() throws ServletException 
+    {
+	try
+	{
+		reconnect();
+	}
+	catch (Exception e)
+	{
+	}
+    }
 
-    public void init() throws ServletException {
-        // Do required initialization
+    public void reconnect() throws SQLException 
+    {
+	try 
+	{
+		Class.forName("com.mysql.jdbc.Driver");
+		conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/db15619?user=root&password=wolken");
+	}
+	catch (Exception e)
+	{
+	}
     }
 
     public void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -24,11 +42,6 @@ public class q3 extends HttpServlet {
         out.println("Wolken,5534-0848-5100,0299-6830-9164,4569-9487-7416");
 	try 
 	{
-		Class.forName("com.mysql.jdbc.Driver");
-   		Properties p = new Properties();
-	    	p.put("user","root");
-    		p.put("password","wolken");
-		Connection conn = DriverManager.getConnection(CONNECTION, p);
 		String query = "select rid from q3 where uid=" + request.getParameter("userid") + ";";
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
@@ -37,15 +50,23 @@ public class q3 extends HttpServlet {
 			String rid = rs.getString("rid");
 			out.println(rid.replace(",", "\n"));
 		}
-		conn.close();
+		rs.close();
+		st.close();
 	}
 	catch (Exception e)
 	{
-		out.println(e + "?\n");
+		out.println(e);
 	}
     }
 
     public void destroy() {
         // do nothing.
+	try
+	{
+		conn.close();
+	}
+	catch (Exception e)
+	{
+	}
     }
 }
