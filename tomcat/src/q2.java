@@ -44,7 +44,7 @@ public class q2 extends HttpServlet {
 	try 
 	{
 		String query = "select concat(tid, \":\", s, \":\", msg) as reply from q2 where uid=" + request.getParameter("userid") + " and ts='" + request.getParameter("tweet_time") + "' order by tid;";
-		out.println(query);
+//		out.println(query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		while (rs.next())
