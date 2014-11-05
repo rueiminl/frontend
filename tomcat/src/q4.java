@@ -26,7 +26,7 @@ public class q4 extends HttpServlet {
 	try 
 	{
 		Class.forName("com.mysql.jdbc.Driver");
-		conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/db15619?user=root&password=ray26368&characterEncoding=UTF-8");
+		conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/db15619?user=root&password=wolken&characterEncoding=UTF-8");
 	}
 	catch (Exception e)
 	{
@@ -43,14 +43,13 @@ public class q4 extends HttpServlet {
         out.println("Wolken,5534-0848-5100,0299-6830-9164,4569-9487-7416");
 	try 
 	{
-		String query = "select concat(tid, \":\", s, \":\", msg) as reply from q2 where uid=" + request.getParameter("userid") + " and ts='" + request.getParameter("tweet_time") + "' order by tid;";
-		out.println(query);
+		String query = "select hashtag, tids from q4 where locdat=\"" + request.getParameter("location") + "____" + request.getParameter("date") + "\" and rank >= " + request.getParameter("m") + " and rank <= " + request.getParameter("n") + " order by rank;";
+//		out.println(query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		while (rs.next())
 		{
-			String reply = rs.getString("reply");
-			out.println(reply);
+			out.println(rs.getString("hashtag") + ":" + rs.getString("tids"));
 		}
 		rs.close();
 		st.close();
