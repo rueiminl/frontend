@@ -5,32 +5,36 @@ import javax.servlet.http.*;
 import java.math.*;
 import java.util.*;
 import java.sql.*;
-
+import org.apache.tomcat.jdbc.pool.DataSource;
+import org.apache.tomcat.jdbc.pool.PoolProperties;
 // Extend HttpServlet class
 public class q4 extends HttpServlet {
-
-    static Connection conn;
+    private DataSource dataSource;
     public void init() throws ServletException 
     {
-	try
-	{
-		reconnect();
-	}
-	catch (Exception e)
-	{
-	}
-    }
-
-    public void reconnect() throws SQLException 
-    {
-	try 
-	{
-		Class.forName("com.mysql.jdbc.Driver");
-		conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/db15619?user=root&password=wolken&characterEncoding=UTF-8");
-	}
-	catch (Exception e)
-	{
-	}
+            PoolProperties p = new PoolProperties();
+            p.setUrl("jdbc:mysql://localhost:3306/db15619?autoReconnect=true&characterEncoding=UTF-8");
+            p.setUsername("root");
+            p.setPassword("wolken");
+            p.setDriverClassName("com.mysql.jdbc.Driver");
+            p.setJmxEnabled(true);
+            p.setTestWhileIdle(false);
+            p.setTestOnBorrow(true);
+            p.setValidationQuery("SELECT 1");
+            p.setTestOnReturn(false);
+            p.setValidationInterval(30000);
+            p.setTimeBetweenEvictionRunsMillis(30000);
+            p.setMaxActive(100);
+            p.setInitialSize(10);
+            p.setMaxWait(10000);
+            p.setRemoveAbandonedTimeout(60);
+            p.setMinEvictableIdleTimeMillis(30000);
+            p.setMinIdle(10);
+            p.setLogAbandoned(true);
+            p.setRemoveAbandoned(true);
+            p.setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");
+            dataSource = new DataSource();
+            dataSource.setPoolProperties(p);
     }
 
     public void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -43,6 +47,7 @@ public class q4 extends HttpServlet {
         out.println("Wolken,5534-0848-5100,0299-6830-9164,4569-9487-7416");
 	try 
 	{
+		Connection conn = dataSource.getConnection();
 		String query = "select hashtag, tids from q4 where locdat=\"" + request.getParameter("location") + "____" + request.getParameter("date") + "\" and rank >= " + request.getParameter("m") + " and rank <= " + request.getParameter("n") + " order by rank;";
 //		out.println(query);
 		Statement st = conn.createStatement();
@@ -53,6 +58,7 @@ public class q4 extends HttpServlet {
 		}
 		rs.close();
 		st.close();
+		conn.close();
 	}
 	catch (Exception e)
 	{
@@ -62,12 +68,5 @@ public class q4 extends HttpServlet {
 
     public void destroy() {
         // do nothing.
-	try
-	{
-		conn.close();
-	}
-	catch (Exception e)
-	{
-	}
     }
 }

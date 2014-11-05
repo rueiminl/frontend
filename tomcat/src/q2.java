@@ -13,7 +13,7 @@ public class q2 extends HttpServlet {
     public void init() throws ServletException 
     {
             PoolProperties p = new PoolProperties();
-            p.setUrl("jdbc:mysql://localhost:3306/db15619?autoReconnect=true");
+            p.setUrl("jdbc:mysql://localhost:3306/db15619?autoReconnect=true&characterEncoding=UTF-8");
             p.setUsername("root");
             p.setPassword("wolken");
             p.setDriverClassName("com.mysql.jdbc.Driver");
@@ -47,9 +47,9 @@ public class q2 extends HttpServlet {
         out.println("Wolken,5534-0848-5100,0299-6830-9164,4569-9487-7416");
 	try 
 	{
+		Connection conn = dataSource.getConnection();
 		String query = "select concat(tid, \":\", s, \":\", msg) as reply from q2 where uid=" + request.getParameter("userid") + " and ts='" + request.getParameter("tweet_time") + "' order by tid;";
 //		out.println(query);
-		Connection conn = dataSource.getConnection();
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		while (rs.next())
