@@ -15,7 +15,7 @@ public class q2 extends HttpServlet {
             PoolProperties p = new PoolProperties();
             p.setUrl("jdbc:mysql://localhost:3306/db15619?autoReconnect=true");
             p.setUsername("root");
-            p.setPassword("ray26368");
+            p.setPassword("wolken");
             p.setDriverClassName("com.mysql.jdbc.Driver");
             p.setJmxEnabled(true);
             p.setTestWhileIdle(false);
