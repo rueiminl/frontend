@@ -5,32 +5,36 @@ import javax.servlet.http.*;
 import java.math.*;
 import java.util.*;
 import java.sql.*;
-
+import org.apache.tomcat.jdbc.pool.DataSource;
+import org.apache.tomcat.jdbc.pool.PoolProperties;
 // Extend HttpServlet class
 public class q2 extends HttpServlet {
-
-    static Connection conn;
+    private DataSource dataSource;
     public void init() throws ServletException 
     {
-	try
-	{
-		reconnect();
-	}
-	catch (Exception e)
-	{
-	}
-    }
-
-    public void reconnect() throws SQLException 
-    {
-	try 
-	{
-		Class.forName("com.mysql.jdbc.Driver");
-		conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/db15619?user=root&password=wolken&characterEncoding=UTF-8");
-	}
-	catch (Exception e)
-	{
-	}
+            PoolProperties p = new PoolProperties();
+            p.setUrl("jdbc:mysql://localhost:3306/db15619?autoReconnect=true");
+            p.setUsername("root");
+            p.setPassword("ray26368");
+            p.setDriverClassName("com.mysql.jdbc.Driver");
+            p.setJmxEnabled(true);
+            p.setTestWhileIdle(false);
+            p.setTestOnBorrow(true);
+            p.setValidationQuery("SELECT 1");
+            p.setTestOnReturn(false);
+            p.setValidationInterval(30000);
+            p.setTimeBetweenEvictionRunsMillis(30000);
+            p.setMaxActive(100);
+            p.setInitialSize(10);
+            p.setMaxWait(10000);
+            p.setRemoveAbandonedTimeout(60);
+            p.setMinEvictableIdleTimeMillis(30000);
+            p.setMinIdle(10);
+            p.setLogAbandoned(true);
+            p.setRemoveAbandoned(true);
+            p.setJdbcInterceptors("org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer");
+            dataSource = new DataSource();
+            dataSource.setPoolProperties(p); 
     }
 
     public void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -45,6 +49,7 @@ public class q2 extends HttpServlet {
 	{
 		String query = "select concat(tid, \":\", s, \":\", msg) as reply from q2 where uid=" + request.getParameter("userid") + " and ts='" + request.getParameter("tweet_time") + "' order by tid;";
 //		out.println(query);
+		Connection conn = dataSource.getConnection();
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		while (rs.next())
@@ -54,6 +59,7 @@ public class q2 extends HttpServlet {
 		}
 		rs.close();
 		st.close();
+		conn.close();
 	}
 	catch (Exception e)
 	{
@@ -62,13 +68,5 @@ public class q2 extends HttpServlet {
     }
 
     public void destroy() {
-        // do nothing.
-	try
-	{
-		conn.close();
-	}
-	catch (Exception e)
-	{
-	}
     }
 }
