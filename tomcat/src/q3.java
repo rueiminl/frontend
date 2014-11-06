@@ -53,7 +53,7 @@ public class q3 extends HttpServlet {
 		ResultSet rs = st.executeQuery(query);
 		while (rs.next())
 		{
-			out.println("rid");
+			out.println(rs.getString("rid"));
 		}
 		rs.close();
 		st.close();
