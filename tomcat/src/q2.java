@@ -44,18 +44,16 @@ public class q2 extends HttpServlet {
 	response.setCharacterEncoding("UTF-8");
         // Actual logic goes here.
         PrintWriter out = response.getWriter();
-        out.println("Wolken,5534-0848-5100,0299-6830-9164,4569-9487-7416");
+        out.println("Wolken,5534-0848-5100,0299-6830-9164");
 	try 
 	{
 		Connection conn = dataSource.getConnection();
 		String query = "select concat(tid, \":\", s, \":\", msg) as reply from q2 where uid=" + request.getParameter("userid") + " and ts='" + request.getParameter("tweet_time") + "' order by tid;";
-//		out.println(query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		while (rs.next())
 		{
-			String reply = rs.getString("reply");
-			out.println(reply);
+			out.println(rs.getString("reply"));
 		}
 		rs.close();
 		st.close();

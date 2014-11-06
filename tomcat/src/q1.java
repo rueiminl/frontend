@@ -23,7 +23,7 @@ public class q1 extends HttpServlet {
 	BigInteger xy = new BigInteger(request.getParameter("key"));
         BigInteger y = xy.divide(x);
 	SimpleDateFormat ft = new SimpleDateFormat ("yyyy-MM-dd hh:mm:ss");
-        out.println(y + "\nWolken,5534-0848-5100,0299-6830-9164,4569-9487-7416\n" + ft.format(new Date()));
+        out.println(y + "\nWolken,5534-0848-5100,0299-6830-9164\n" + ft.format(new Date()));
     }
 
     public void destroy() {

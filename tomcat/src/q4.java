@@ -44,7 +44,7 @@ public class q4 extends HttpServlet {
 	response.setCharacterEncoding("UTF-8");
         // Actual logic goes here.
         PrintWriter out = response.getWriter();
-        out.println("Wolken,5534-0848-5100,0299-6830-9164,4569-9487-7416");
+        out.println("Wolken,5534-0848-5100,0299-6830-9164");
 	try 
 	{
 		Connection conn = dataSource.getConnection();

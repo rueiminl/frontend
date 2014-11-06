@@ -44,7 +44,7 @@ public class q3 extends HttpServlet {
         response.setContentType("text/plain");
         // Actual logic goes here.
         PrintWriter out = response.getWriter();
-        out.println("Wolken,5534-0848-5100,0299-6830-9164,4569-9487-7416");
+        out.println("Wolken,5534-0848-5100,0299-6830-9164");
 	try 
 	{
 		Connection conn = dataSource.getConnection();
@@ -53,8 +53,7 @@ public class q3 extends HttpServlet {
 		ResultSet rs = st.executeQuery(query);
 		while (rs.next())
 		{
-			String rid = rs.getString("rid");
-			out.println(rid.replace(",", "\n"));
+			out.println("rid");
 		}
 		rs.close();
 		st.close();
